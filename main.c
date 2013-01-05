@@ -14,7 +14,7 @@ struct sockaddr_in pars_input(int argc_s, char **argv_s) {
 
   memset(&parsedArgs, 0, sizeof(struct sockaddr_in) );
 
-  parsedArgs.sin_addr.s_addr = htonl(INADDR_ANY);                                /*domyslnie: wyszstkie interfejsy o ile uztkownik nie poda na wejsciu adresu*/
+  parsedArgs.sin_addr.s_addr = htonl(INADDR_ANY);                                /*domyslnie: wyszstkie interfejsy o ile uzytkownik nie poda na wejsciu adresu*/
 
   while((opt = getopt_long(argc_s, argv_s, optString, longOpts, NULL )) != -1)  {
     switch(opt)  {
@@ -38,7 +38,6 @@ struct sockaddr_in pars_input(int argc_s, char **argv_s) {
 
 }
 
-/****************************************************/
 
 int socket_descriptor_create(void)  {
 
@@ -55,7 +54,6 @@ int socket_descriptor_create(void)  {
 
 }
 
-/****************************************************/
 
 int socket_binder(int socketDescriptor, struct sockaddr_in srvAdd)  {
 
@@ -70,7 +68,6 @@ int socket_binder(int socketDescriptor, struct sockaddr_in srvAdd)  {
 
 }
 
-/****************************************************/
 
 void socket_listen(int socketDescriptor)  {
 
@@ -107,6 +104,8 @@ void socket_listen(int socketDescriptor)  {
       }
 
     if(clientPid == 0)  {
+      signal(SIGTERM, signal_handler);
+      signal(SIGINT, signal_handler);
       close(socketDescriptor);
       connection_handler(clientSock);
       close(clientSock);
@@ -119,7 +118,6 @@ void socket_listen(int socketDescriptor)  {
 
 }
 
-/****************************************************/
 
 void connection_handler(int socket)  {
 
@@ -147,7 +145,6 @@ void connection_handler(int socket)  {
 
 }
 
-/****************************************************/
 
 int splitter_countWords(char* buffer)  {
 
@@ -162,7 +159,6 @@ int splitter_countWords(char* buffer)  {
 
 }
 
-/****************************************************/
 
 struct cmdStruct* splitter(char* buffer)  {
 
@@ -192,34 +188,28 @@ struct cmdStruct* splitter(char* buffer)  {
 
 }
 
-/****************************************************/
 
 void command_handler(struct cmdStruct* commandsList, int socket)  {
 
-  char* errorString = "Nieprawidlowe polecenie!\n";
 
-  if(strcmp(commandsList->words[0], "ls") == 0) command_ls(commandsList, socket);
-  else if (strcmp(commandsList->words[0],"get")==0) command_get(commandsList,socket);
-  else if (strcmp(commandsList->words[0],"put")==0) command_put(commandsList,socket);
-  else if (strcmp(commandsList->words[0],"move")==0) command_move(commandsList,socket);
-  /*else if (strcmp(commandsList->words[0],"replace")==0) command_replace(cmdTemp,socket);*/
-  else if (strcmp(commandsList->words[0],"rm")==0) command_rm(commandsList,socket);
-  else if (strcmp(commandsList->words[0],"quit")==0) command_quit(commandsList, socket);
-  else {
-    write(socket, errorString, strlen(errorString));
-    }
+  if(strncmp(commandsList->words[0], "ls", 2) == 0) command_ls(commandsList, socket);
+  else if (strncmp(commandsList->words[0],"get", 3)==0) command_get(commandsList, socket);
+  else if (strncmp(commandsList->words[0],"put", 3)==0) command_put(commandsList, socket);
+  else if (strncmp(commandsList->words[0],"move", 4)==0) command_move(commandsList, socket);
+  else if (strcmp(commandsList->words[0],"replace")==0) command_replace(commandsList, socket);
+  else if (strncmp(commandsList->words[0],"rm", 2)==0) command_rm(commandsList, socket);
+  else if (strncmp(commandsList->words[0],"quit", 4)==0) command_quit(commandsList, socket);
+  else info_transmission_handler(socket, __INVALID_COMMAND);
 
 
 }
 
-/****************************************************/
 
 void command_ls(struct cmdStruct* commandsList, int socket)  {
 
   char fifoBuffer[__BUFFER_SIZE];
-  char* errorMsg = "Nie udalo sie wykonac polecenia\n";
   int descr[2];
-  int stdoutDescr = dup(STDOUT_FILENO);
+  int stdoutDescr = dup(STDOUT_FILENO);                                          /*kopie deskryptorow*/
   int stdinDescr = dup(STDIN_FILENO);
   int stderrDescr = dup(STDERR_FILENO);
   int size = 0;
@@ -236,7 +226,7 @@ void command_ls(struct cmdStruct* commandsList, int socket)  {
     dup2(stdinDescr,0);                                                          /*przywrocenie poprzednich wejsc*/
     dup2(stdoutDescr,1);
     dup2(stderrDescr,2);
-    write(socket,errorMsg,strlen(errorMsg));
+    info_transmission_handler(socket, __COMMAND_EXEC_ERROR);
     } else  {
     dup2(descr[0], 0);                                                           /*przekierowanie stdin na FIFO_IN*/
     close(descr[1]);
@@ -258,37 +248,39 @@ void command_ls(struct cmdStruct* commandsList, int socket)  {
 
 }
 
-/****************************************************/
 
 void command_get(struct cmdStruct* commandsList, int socket)  {
 
   FILE* fileStream;
   char readBuffer[__BUFFER_SIZE];
   int readSize = 0;
-  char* errorMsg = "Nie udalo sie otworzyc pliku\n";
+  char* readModeBinary = "rb";
+  char* readModeText = "rt";
+  char* readMode;
 
-  if(!strncmp(commandsList->words[2],"-t",2) || !strncmp(commandsList->words[2],"--text",6))  {
-    if((fileStream = fopen(commandsList->words[1],"rt")) == NULL)  {
-      write(socket,errorMsg,strlen(errorMsg));
-      } else  {
-      while((readSize = fread(readBuffer, sizeof(char), __BUFFER_SIZE, fileStream)) > 0)  {
-        send(socket, readBuffer, readSize, 0);
-        }
-      fclose(fileStream);
-      }
-    } else if(!strncmp(commandsList->words[2],"-b",2) || !strncmp(commandsList->words[2],"--binary",8))  {
-    if((fileStream = fopen(commandsList->words[1],"rb")) == NULL)  {
-      write(socket,errorMsg,strlen(errorMsg));
-      }
-  else  {
-
+  if(commandsList->wordCount < 2)  {
+    info_transmission_handler(socket,__NOT_ENOUGH_ARGUMENTS);
+    exit(1);
     }
-  }
+  else if(commandsList->wordCount < 3 || !strncmp(commandsList->words[2],"-t",2) || !strncmp(commandsList->words[2],"--text",8)) readMode = readModeText;
+  else if(!strncmp(commandsList->words[2],"-b",2) || !strncmp(commandsList->words[2],"--binary",8)) readMode = readModeBinary;
+  if((fileStream = fopen(commandsList->words[1],readMode)) == NULL)  {
+    info_transmission_handler(socket, __ERROR_OPENING_FILE);
+    exit(1);
+    } else  {
+      fflush(stdout);
+    while((readSize = fread(readBuffer, sizeof(char), __BUFFER_SIZE, fileStream)) > 0)  {
+      send(socket, readBuffer, readSize, 0);
+      }
+      fclose(fileStream);
+      printf("Zakonczono wysylanie pliku...\n");
+      fflush(stdout);
+      shutdown(socket, 1);
+    }
 
 
 }
 
-/****************************************************/
 
 void command_put(struct cmdStruct* commandsList, int socket)  {
 
@@ -296,43 +288,39 @@ void command_put(struct cmdStruct* commandsList, int socket)  {
   char writeBuffer[__BUFFER_SIZE];
   int recvSize = 0;
   int writeSize = 0;
-  char* errorMsg1 = "Nie udalo sie utworzyc pliku\n";
-  char* errorMsg2 = "Blad transmisji\n";
+  char* writeMode;
+  char* writeModeText = "wt";
+  char* writeModeBinary = "wr";
 
-  if(!strncmp(commandsList->words[2],"-t",2) || !strncmp(commandsList->words[2],"--text",6))  {
-    if((fileStream = fopen(commandsList->words[1],"wt")) == NULL)  {
-      write(socket,errorMsg1,strlen(errorMsg1));
-      }
-    else  {
-      while((recvSize = recv(socket, writeBuffer, __BUFFER_SIZE, 0)) > 0) {
-        writeSize = fwrite(writeBuffer, sizeof(char), recvSize, fileStream);
-        if(recvSize != writeSize) write(socket, errorMsg2, strlen(errorMsg2));
-        remove(commandsList->words[2]);
-        break;
-      }
-      fclose(fileStream);
-      }
+  if(commandsList->wordCount < 2)  {
+    info_transmission_handler(socket,__NOT_ENOUGH_ARGUMENTS);
+    exit(1);
     }
-
-  else if(!strncmp(commandsList->words[2],"-b",2) || !strncmp(commandsList->words[2],"--binary",8))  {
-    if((fileStream = fopen(commandsList->words[1],"rb")) == NULL)  {
-      write(socket,errorMsg1,strlen(errorMsg1));
-      }
-    else  {
-
-
+  else if(commandsList->wordCount < 3 || !strncmp(commandsList->words[2],"-t",2) || !strncmp(commandsList->words[2],"--text",8)) writeMode = writeModeText;
+  else if(!strncmp(commandsList->words[2],"-b",2) || !strncmp(commandsList->words[2],"--binary",8)) writeMode = writeModeBinary;
+    if((fileStream = fopen(commandsList->words[1],writeMode)) == NULL)  {
+    info_transmission_handler(socket, __ERROR_OPENING_FILE);
+    exit(1);
     }
-  }
+  else  {
+    while((recvSize = recv(socket, writeBuffer, __BUFFER_SIZE, 0)) > 0) {
+      writeSize = fwrite(writeBuffer, sizeof(char), recvSize, fileStream);
+    }
+    printf("Odebrano plik %s\n", commandsList->words[1]);
+    info_transmission_handler(socket,__TRANSFER_COMPLETE);
+    fclose(fileStream);
+    shutdown(socket,0);
+    close(socket);
+    exit(0);
+    }
 
 
 }
 
-/****************************************************/
 
 void command_move(struct cmdStruct* commandsList, int socket)  {
 
   char fifoBuffer[__BUFFER_SIZE];
-  char* errorMsg = "Nie udalo sie wykonac polecenia\n";
   int descr[2];
   int stdoutDescr = dup(STDOUT_FILENO);
   int stdinDescr = dup(STDIN_FILENO);
@@ -351,7 +339,7 @@ void command_move(struct cmdStruct* commandsList, int socket)  {
     dup2(stdinDescr,0);                                                          /*przywrocenie poprzednich wejsc*/
     dup2(stdoutDescr,1);
     dup2(stderrDescr,2);
-    write(socket,errorMsg,strlen(errorMsg));
+    info_transmission_handler(socket, __COMMAND_EXEC_ERROR);
     } else  {
     dup2(descr[0], 0);                                                           /*przekierowanie stdin na FIFO_IN*/
     close(descr[1]);
@@ -373,12 +361,31 @@ void command_move(struct cmdStruct* commandsList, int socket)  {
 
 }
 
-/****************************************************/
+
+void command_replace(struct cmdStruct* commandsList, int socket)  {
+
+  struct cmdStruct* commands1 = (struct cmdStruct*) malloc(sizeof(struct cmdStruct*));
+  struct cmdStruct* commands2 = (struct cmdStruct*) malloc(sizeof(struct cmdStruct*));
+  char* argvTemp1[2];
+  char* argvTemp2[3];
+  argvTemp1[0] = "rm";
+  argvTemp1[1] = commandsList->words[1];
+  argvTemp2[0] = "put";
+  argvTemp2[1] = commandsList->words[2];
+  argvTemp2[2] = commandsList->words[3];
+  commands1->words = argvTemp1;
+  commands1->wordCount = 2;
+  commands2->wordCount = 3;
+  commands2->words = argvTemp2;
+  printf("%s %s",commands1->words[0],commands1->words[1]);
+  command_rm(commands1, socket);
+  command_put(commands2, socket);
+}
+
 
 void command_rm(struct cmdStruct* commandsList, int socket)  {
 
   char fifoBuffer[__BUFFER_SIZE];
-  char* errorMsg = "Nie udalo sie wykonac polecenia\n";
   int descr[2];
   int stdoutDescr = dup(STDOUT_FILENO);
   int stdinDescr = dup(STDIN_FILENO);
@@ -397,7 +404,7 @@ void command_rm(struct cmdStruct* commandsList, int socket)  {
     dup2(stdinDescr,0);                                                          /*przywrocenie poprzednich wejsc*/
     dup2(stdoutDescr,1);
     dup2(stderrDescr,2);
-    write(socket,errorMsg,strlen(errorMsg));
+    info_transmission_handler(socket, __COMMAND_EXEC_ERROR);
     } else  {
     dup2(descr[0], 0);                                                           /*przekierowanie stdin na FIFO_IN*/
     close(descr[1]);
@@ -419,12 +426,52 @@ void command_rm(struct cmdStruct* commandsList, int socket)  {
 
 }
 
-/****************************************************/
+void info_transmission_handler(int socket, int iType)  {
+
+  char* quitMessage = "Serwer: Zakonczono polaczenie z serwerem\n";
+  char* neaMessage = "Serwer: Wprowadzono za malo argumentow\n";
+  char* tcMessage = "Serwer: Plik zapisano pomyslnie\n";
+  char* errofMessage = "Serwer: Nie udalo sie otworzyc pliku\n";
+  char* eecMessage = "Serwer: Nie udalo sie wykonac polecenia\n";
+  char* invcMessage = "Serwer: Nieprawidlowa komenda\n";
+
+  switch(iType)  {
+    case 0:
+      write(socket,quitMessage,strlen(quitMessage));
+      break;
+
+    case 1:
+      write(socket,neaMessage,strlen(neaMessage));
+      break;
+    case 2:
+
+      write(socket,tcMessage,strlen(tcMessage));
+      break;
+    case 3:
+
+      write(socket,errofMessage,strlen(errofMessage));
+      break;
+    case 4:
+
+      write(socket,eecMessage,strlen(eecMessage));
+      break;
+
+    case 5:
+      write(socket,invcMessage,strlen(invcMessage));
+      break;
+
+    default:
+      break;
+
+  }
+
+
+}
 
 void command_quit(struct cmdStruct* cmdStruct, int socket)  {
 
-  char* endMessage = "Zakonczono polaczenie z serwerem\n";
-  write(socket,endMessage,strlen(endMessage));
+  
+  info_transmission_handler(socket, __TYPE_QUIT);
   close(socket);
   free(cmdStruct);
   while(wait(0) != -1) continue;
@@ -434,30 +481,38 @@ void command_quit(struct cmdStruct* cmdStruct, int socket)  {
 
 }
 
-/****************************************************/
 
-
-void signal_reaper(int signo)  {
+void signal_handler(int signo)  {
 
   pid_t pid;
   int status;
 
-  while((pid=waitpid(-1,&status,WNOHANG)) > 0)  {
-    printf("proces PID = %d, STATUS = %s\n", pid, (WEXITSTATUS(status) == 0) ? "Zakonczony poprawnie" : "Zakonczony z bledem");
+  if(signo == SIGCHLD)  {
+    while((pid=waitpid(-1,&status,WNOHANG)) > 0)  {
+      printf("proces PID = %d, STATUS = %s\n", pid, (WEXITSTATUS(status) == 0) ? "Zakonczony poprawnie" : "Zakonczony z bledem");
+      }
     }
+  if(signo == SIGINT)  {}
+  if(signo == SIGTERM)  {}
 
 
 }
 
-/****************************************************/
+
+void display_usage (void) {
+  printf("Skladnia: serwer_plikow [OPCJA]\n\n");
+  printf("   -i, --interface=[ADRES_IP]     Adres, na ktorym serwer nasluchuje (domyslnie: wszystkie interfejsy)\n");
+  printf("   -p, --port=[PORT]     Numer portu, na ktorym serwer nasluchuje (opcja wymagana)\n\n");
+  exit(1);
+}
+
 
 int main (int argc, char **argv)  {
 
   int socketDescriptor;
   struct sockaddr_in serverAddress;
 
-  sigset(SIGCHLD,signal_reaper);                                                 /*czyszczenie pozostalosci po procesach klientow (i nie tylko)*/
-
+  sigset(SIGCHLD, signal_handler);                                                /*czyszczenie pozostalosci po procesach klientow (i nie tylko)*/
   serverAddress = pars_input(argc,argv);
   if(serverAddress.sin_port == 0) display_usage();                               /*jezeli uzytkownik nie poda nr'u portu to program pokaze monit z poprawna skladnia (helpscreen)*/
   socketDescriptor = socket_descriptor_create();
