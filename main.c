@@ -258,25 +258,24 @@ void command_get(struct cmdStruct* commandsList, int socket)  {
   char* readModeText = "rt";
   char* readMode;
 
-  if(commandsList->wordCount < 2)  {
-    info_transmission_handler(socket,__NOT_ENOUGH_ARGUMENTS);
-    exit(1);
-    }
-  else if(commandsList->wordCount < 3 || !strncmp(commandsList->words[2],"-t",2) || !strncmp(commandsList->words[2],"--text",8)) readMode = readModeText;
-  else if(!strncmp(commandsList->words[2],"-b",2) || !strncmp(commandsList->words[2],"--binary",8)) readMode = readModeBinary;
-  if((fileStream = fopen(commandsList->words[1],readMode)) == NULL)  {
-    info_transmission_handler(socket, __ERROR_OPENING_FILE);
-    exit(1);
-    } else  {
-      fflush(stdout);
-    while((readSize = fread(readBuffer, sizeof(char), __BUFFER_SIZE, fileStream)) > 0)  {
-      send(socket, readBuffer, readSize, 0);
-      }
+  if(commandsList->wordCount >= 2)  {
+    if(commandsList->wordCount < 3 || !strncmp(commandsList->words[2],"-t",2) || !strncmp(commandsList->words[2],"--text",8)) readMode = readModeText;
+    else if(!strncmp(commandsList->words[2],"-b",2) || !strncmp(commandsList->words[2],"--binary",8)) readMode = readModeBinary;
+    if((fileStream = fopen(commandsList->words[1],readMode)) == NULL)  {
+      info_transmission_handler(socket, __ERROR_OPENING_FILE);
+      shutdown(socket, 1);
+      } else  {
+        fflush(stdout);
+      while((readSize = fread(readBuffer, sizeof(char), __BUFFER_SIZE, fileStream)) > 0)  {
+        send(socket, readBuffer, readSize, 0);
+        }
       fclose(fileStream);
       printf("Zakonczono wysylanie pliku...\n");
       fflush(stdout);
       shutdown(socket, 1);
+      }
     }
+    else info_transmission_handler(socket,__NOT_ENOUGH_ARGUMENTS);
 
 
 }
@@ -292,26 +291,28 @@ void command_put(struct cmdStruct* commandsList, int socket)  {
   char* writeModeText = "wt";
   char* writeModeBinary = "wr";
 
-  if(commandsList->wordCount < 2)  {
+  if(commandsList->wordCount >= 2)  {
+    if(commandsList->wordCount < 3 || !strncmp(commandsList->words[2],"-t",2) || !strncmp(commandsList->words[2],"--text",8)) writeMode = writeModeText;
+    else if(!strncmp(commandsList->words[2],"-b",2) || !strncmp(commandsList->words[2],"--binary",8)) writeMode = writeModeBinary;
+      if((fileStream = fopen(commandsList->words[1],writeMode)) == NULL)  {
+      info_transmission_handler(socket, __ERROR_OPENING_FILE);
+      shutdown(socket, 0);
+      close(socket);
+      exit(1);
+      }
+    else  {
+      while((recvSize = recv(socket, writeBuffer, __BUFFER_SIZE, 0)) > 0) {
+        writeSize = fwrite(writeBuffer, sizeof(char), recvSize, fileStream);
+      }
+      printf("Odebrano plik %s\n", commandsList->words[1]);
+      info_transmission_handler(socket,__TRANSFER_COMPLETE);
+      fclose(fileStream);
+      shutdown(socket,0);
+      close(socket);
+      exit(0);
+      }
+  } else  {
     info_transmission_handler(socket,__NOT_ENOUGH_ARGUMENTS);
-    exit(1);
-    }
-  else if(commandsList->wordCount < 3 || !strncmp(commandsList->words[2],"-t",2) || !strncmp(commandsList->words[2],"--text",8)) writeMode = writeModeText;
-  else if(!strncmp(commandsList->words[2],"-b",2) || !strncmp(commandsList->words[2],"--binary",8)) writeMode = writeModeBinary;
-    if((fileStream = fopen(commandsList->words[1],writeMode)) == NULL)  {
-    info_transmission_handler(socket, __ERROR_OPENING_FILE);
-    exit(1);
-    }
-  else  {
-    while((recvSize = recv(socket, writeBuffer, __BUFFER_SIZE, 0)) > 0) {
-      writeSize = fwrite(writeBuffer, sizeof(char), recvSize, fileStream);
-    }
-    printf("Odebrano plik %s\n", commandsList->words[1]);
-    info_transmission_handler(socket,__TRANSFER_COMPLETE);
-    fclose(fileStream);
-    shutdown(socket,0);
-    close(socket);
-    exit(0);
     }
 
 
