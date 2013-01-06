@@ -1,4 +1,0 @@
-cmake_minimum_required (VERSION 2.6)
-
-
-add_library (parsers STATIC splitter.c input_parser_local.c input_parser_remote.c)
