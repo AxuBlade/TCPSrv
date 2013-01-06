@@ -10,9 +10,10 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 #define __MAX_CONNECT_REQUEST 5                                                  /*maksymalna ilosc jednoczesnych zadan dla listen*/
-#define __BUFFER_SIZE 1024                                                       /*wielkosc buforu odczytu dla komunikacji wewnatrz i na zewnatrz programu*/
+#define __BUFFER_SIZE 2048                                                       /*wielkosc buforu odczytu dla komunikacji wewnatrz i na zewnatrz programu*/
 
 
 
@@ -22,6 +23,7 @@
 #define __ERROR_OPENING_FILE 3
 #define __COMMAND_EXEC_ERROR 4
 #define __INVALID_COMMAND 5
+#define __EMPTY_FILE 6
 
 struct cmdStruct {                                                               /*struktura do przechowywania komend przeslanych przez uzytkownika w postaci poszczegolnych slow*/
   char** words;

@@ -257,20 +257,22 @@ void command_get(struct cmdStruct* commandsList, int socket)  {
   char* readModeBinary = "rb";
   char* readModeText = "rt";
   char* readMode;
+  struct stat fileStat;
 
   if(commandsList->wordCount >= 2)  {
-    if(commandsList->wordCount < 3 || !strncmp(commandsList->words[2],"-t",2) || !strncmp(commandsList->words[2],"--text",8)) readMode = readModeText;
+    if(commandsList->wordCount < 3) readMode = readModeText;
+    if(!strncmp(commandsList->words[2],"-t",2) || !strncmp(commandsList->words[2],"--text",8)) readMode = readModeText;
     else if(!strncmp(commandsList->words[2],"-b",2) || !strncmp(commandsList->words[2],"--binary",8)) readMode = readModeBinary;
     if((fileStream = fopen(commandsList->words[1],readMode)) == NULL)  {
       info_transmission_handler(socket, __ERROR_OPENING_FILE);
       shutdown(socket, 1);
       } else  {
-        fflush(stdout);
       while((readSize = fread(readBuffer, sizeof(char), __BUFFER_SIZE, fileStream)) > 0)  {
         send(socket, readBuffer, readSize, 0);
         }
       fclose(fileStream);
-      printf("Zakonczono wysylanie pliku...\n");
+      stat(commandsList->words[1], &fileStat);
+      printf("Wyslano %d bajtow\n", (signed int)fileStat.st_size);
       fflush(stdout);
       shutdown(socket, 1);
       }
@@ -290,9 +292,11 @@ void command_put(struct cmdStruct* commandsList, int socket)  {
   char* writeMode;
   char* writeModeText = "wt";
   char* writeModeBinary = "wr";
+  struct stat fileStat;
 
   if(commandsList->wordCount >= 2)  {
-    if(commandsList->wordCount < 3 || !strncmp(commandsList->words[2],"-t",2) || !strncmp(commandsList->words[2],"--text",8)) writeMode = writeModeText;
+    if(commandsList->wordCount < 3) writeMode = writeModeText;                 /*domyslny tryb: tekstowy*/
+    if(!strncmp(commandsList->words[2],"-t",2) || !strncmp(commandsList->words[2],"--text",8)) writeMode = writeModeText;
     else if(!strncmp(commandsList->words[2],"-b",2) || !strncmp(commandsList->words[2],"--binary",8)) writeMode = writeModeBinary;
       if((fileStream = fopen(commandsList->words[1],writeMode)) == NULL)  {
       info_transmission_handler(socket, __ERROR_OPENING_FILE);
@@ -304,9 +308,13 @@ void command_put(struct cmdStruct* commandsList, int socket)  {
       while((recvSize = recv(socket, writeBuffer, __BUFFER_SIZE, 0)) > 0) {
         writeSize = fwrite(writeBuffer, sizeof(char), recvSize, fileStream);
       }
-      printf("Odebrano plik %s\n", commandsList->words[1]);
-      info_transmission_handler(socket,__TRANSFER_COMPLETE);
       fclose(fileStream);
+      stat(commandsList->words[1], &fileStat);
+      if(!fileStat.st_size)  {
+        printf("Odebrano pusty plik plik %s -> usuwanie\n", commandsList->words[1], (signed int) fileStat.st_size);
+        info_transmission_handler(socket,__EMPTY_FILE);
+        remove(commandsList->words[1]);
+        } else printf("Odebrano plik %s o rozmiarze %d\n", commandsList->words[1], (signed int) fileStat.st_size);
       shutdown(socket,0);
       close(socket);
       exit(0);
@@ -435,6 +443,7 @@ void info_transmission_handler(int socket, int iType)  {
   char* errofMessage = "Serwer: Nie udalo sie otworzyc pliku\n";
   char* eecMessage = "Serwer: Nie udalo sie wykonac polecenia\n";
   char* invcMessage = "Serwer: Nieprawidlowa komenda\n";
+  char* efMessage = "Serwer: Odebrany plik jest pusty! kasowanie...\n";
 
   switch(iType)  {
     case 0:
