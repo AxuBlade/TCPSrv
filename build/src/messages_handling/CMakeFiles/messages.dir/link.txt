@@ -1,2 +1,0 @@
-/usr/bin/ar cr libmessages.a  CMakeFiles/messages.dir/info_remote_handler.c.o CMakeFiles/messages.dir/info_local_handler.c.o
-/usr/bin/ranlib libmessages.a

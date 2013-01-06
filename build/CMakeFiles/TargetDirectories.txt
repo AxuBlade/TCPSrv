@@ -1,5 +1,0 @@
-/home/axu/projects/TcpServer/build/src/commands_handling/CMakeFiles/commands.dir
-/home/axu/projects/TcpServer/build/src/messages_handling/CMakeFiles/messages.dir
-/home/axu/projects/TcpServer/build/src/parsers/CMakeFiles/parsers.dir
-/home/axu/projects/TcpServer/build/src/signals_handling/CMakeFiles/signals.dir
-/home/axu/projects/TcpServer/build/src/CMakeFiles/tcpserver.dir

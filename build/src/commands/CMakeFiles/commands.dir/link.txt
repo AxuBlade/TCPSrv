@@ -1,2 +1,0 @@
-/usr/bin/ar cr libcommands.a  CMakeFiles/commands.dir/command_put.c.o CMakeFiles/commands.dir/command_get.c.o CMakeFiles/commands.dir/command_ls.c.o CMakeFiles/commands.dir/command_move.c.o CMakeFiles/commands.dir/command_rename.c.o CMakeFiles/commands.dir/command_rm.c.o CMakeFiles/commands.dir/command_quit.c.o
-/usr/bin/ranlib libcommands.a
