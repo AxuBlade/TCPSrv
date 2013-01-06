@@ -1,0 +1,1 @@
+/usr/bin/gcc  -ansi -pedantic -g    CMakeFiles/tcpserver.dir/main.c.o CMakeFiles/tcpserver.dir/connection_handling.c.o  -o tcpserver -rdynamic commands_handling/libcommands.a parsers/libparsers.a messages_handling/libmessages.a signals_handling/libsignals.a 

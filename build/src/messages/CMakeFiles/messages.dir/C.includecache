@@ -1,0 +1,44 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/axu/projects/TcpServer/src/messages/../defines.h
+arpa/inet.h
+-
+errno.h
+-
+getopt.h
+-
+netinet/in.h
+-
+signal.h
+-
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+sys/types.h
+-
+sys/socket.h
+-
+unistd.h
+-
+sys/wait.h
+-
+sys/stat.h
+-
+
+/home/axu/projects/TcpServer/src/messages/info_local_handler.c
+../defines.h
+/home/axu/projects/TcpServer/src/messages/../defines.h
+
+/home/axu/projects/TcpServer/src/messages/info_remote_handler.c
+../defines.h
+/home/axu/projects/TcpServer/src/messages/../defines.h
+

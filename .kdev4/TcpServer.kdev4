@@ -1,0 +1,48 @@
+[Buildset]
+BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x01\x00\x00\x00\x12\x00T\x00c\x00p\x00S\x00e\x00r\x00v\x00e\x00r)
+
+[CMake]
+Build Directory Count=1
+CMakeDir=/usr/share/cmake-2.8/Modules
+Current Build Directory Index=0
+ProjectRootRelative=./
+
+[CMake][CMake Build Directory 0]
+Build Directory Path=file:///home/axu/projects/TcpServer/build
+Build Type=Debug
+CMake Binary=file:///usr/bin/cmake
+Environment Profile=
+Extra Arguments=
+Install Directory=file:///usr/local
+
+[Launch]
+Launch Configurations=Launch Configuration 0
+
+[Launch][Launch Configuration 0]
+Configured Launch Modes=execute
+Configured Launchers=nativeAppLauncher
+Name=Nowa konfiguracja Natywny program
+Type=Native Application
+
+[Launch][Launch Configuration 0][Data]
+Arguments=-p 13333
+Debugger Shell=
+Dependencies=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x00)
+Dependency Action=Build
+Display Demangle Names=true
+Display Static Members=false
+EnvironmentGroup=default
+Executable=file:///home/axu/projects/TcpServer/build/tcpserver
+External Terminal=konsole --noclose --workdir %workdir -e %exe
+GDB Path=file:///usr/bin/gdb
+Project Target=TcpServer,tcpserver
+Remote GDB Config Script=
+Remote GDB Run Script=
+Remote GDB Shell Script=
+Start With=ApplicationOutput
+Use External Terminal=false
+Working Directory=file:///home/axu/projects/TcpServer/build
+isExecutable=true
+
+[Project]
+VersionControlSupport=kdevgit

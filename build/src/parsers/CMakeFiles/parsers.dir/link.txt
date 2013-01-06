@@ -1,0 +1,2 @@
+/usr/bin/ar cr libparsers.a  CMakeFiles/parsers.dir/splitter.c.o CMakeFiles/parsers.dir/input_parser_local.c.o
+/usr/bin/ranlib libparsers.a

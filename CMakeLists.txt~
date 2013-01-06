@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 2.8)
+project(tcpserver)
+
+add_subdirectory(src)
+add_dependencies(tcpserver src)
+add_dependencies(commands src/commands)
+install(TARGETS tcpserver RUNTIME DESTINATION bin)
