@@ -11,7 +11,7 @@ void signal_handler(int signo)  {
       }
     }
   if(signo == SIGINT || signo == SIGTERM)  {
-    info_remote_handler(socket, __SERVER_TERMINATE);
+    /*info_remote_handler(socket, __SERVER_TERMINATE);*/
     kill(0 ,signo);
   }
 }

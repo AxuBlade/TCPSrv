@@ -4,7 +4,10 @@ int main (int argc, char **argv)  {
 
   int socketDescriptor;
   struct sockaddr_in serverAddress;
+  struct sigaction new_action, old_action;
 
+
+  
   sigset(SIGCHLD, signal_handler);                                                /*czyszczenie pozostalosci po procesach klientow (i nie tylko)*/
   serverAddress = input_parser_local(argc,argv);
   if(serverAddress.sin_port == 0) info_local_handler(__SRV_INVALID_SYNTAX);       /*jezeli uzytkownik nie poda nr'u portu to program program nie rozpocznie nawiazywania polaczenia*/
