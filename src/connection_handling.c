@@ -116,7 +116,7 @@ void __connection_handler(int socket)  {
         info_local_handler(__TRANSFER_ERROR);
     }
   } while(readSize && permissionToRunFlag);
-
+  if(!permissionToRunFlag) info_remote_handler(socket, __UNEXPECTED_TERMINATION);
 
 
 }
@@ -126,12 +126,12 @@ void __command_handler(struct cmdStruct* commandsList, int socket)  {
 
   if(permissionToRunFlag) {
     if(strncmp(commandsList->words[0], "ls", 2) == 0) command_ls(commandsList, socket);
-    else if (strncmp(commandsList->words[0],"get", 3)==0) command_get(commandsList, socket);
-    else if (strncmp(commandsList->words[0],"put", 3)==0) command_put(commandsList, socket);
-    else if (strncmp(commandsList->words[0],"move", 4)==0) command_move(commandsList, socket);
-    else if (strcmp(commandsList->words[0],"replace")==0) command_replace(commandsList, socket);
-    else if (strncmp(commandsList->words[0],"rm", 2)==0) command_rm(commandsList, socket);
-    else if (strncmp(commandsList->words[0],"quit", 4)==0) command_quit(commandsList, socket);
+    else if (strncmp(commandsList->words[0], "get", 3)==0) command_get(commandsList, socket);
+    else if (strncmp(commandsList->words[0], "put", 3)==0) command_put(commandsList, socket);
+    else if (strncmp(commandsList->words[0], "move", 4)==0) command_move(commandsList, socket);
+    else if (strncmp(commandsList->words[0], "replace", 7)==0) command_replace(commandsList, socket);
+    else if (strncmp(commandsList->words[0], "rm", 2)==0) command_rm(commandsList, socket);
+    else if (strncmp(commandsList->words[0], "quit", 4)==0) command_quit(commandsList, socket);
     else info_remote_handler(socket, __INVALID_COMMAND);
   }
 

@@ -22,7 +22,7 @@
 #define __COMMAND_EXEC_ERROR 5
 #define __INVALID_COMMAND 6
 #define __EMPTY_FILE 7
-#define __SERVER_TERMINATE 8
+#define __UNEXPECTED_TERMINATION 8
 
 
 struct cmdStruct  {                                                               /* struktura do przechowywania komend przeslanych przez uzytkownika w postaci poszczegolnych slow */
