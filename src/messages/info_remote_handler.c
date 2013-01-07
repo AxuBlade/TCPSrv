@@ -1,4 +1,8 @@
+#include <string.h>
+#include <unistd.h>
+#include "info_remote_handler.h"
 #include "../defines.h"
+
 
 void info_remote_handler(int socket, int iType)  {
 

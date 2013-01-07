@@ -1,4 +1,9 @@
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include "splitter.h"
 #include "../defines.h"
+
 
 int splitter_countWords(char* buffer)  {
 
@@ -7,7 +12,7 @@ int splitter_countWords(char* buffer)  {
 
   for(i = 0; i < (strlen(buffer)); ++i)  {
     if((int)buffer[i] == 32) wordCount++;
-    }
+  }
   return wordCount + 1;
 
 
@@ -30,13 +35,11 @@ struct cmdStruct* splitter(char* buffer)  {
     memset(temp[i], 0, sizeof(temp[i]));
     strncpy(temp[i], buffer, wordSize);
     buffer = buffer + wordSize + 1;
-    }
+  }
 
-  temp[vTabSize] = NULL;                                                          /*ostatni element tablicy **words musi miec wartosc NULL dla zgodnosci z execvp*/
+  temp[vTabSize] = NULL;                                                       /*ostatni element tablicy **words musi miec wartosc NULL dla zgodnosci z execvp*/
   tempStruct->wordCount = vTabSize;
   tempStruct->words = temp;
-  printf("parsing done\n");
-  fflush(stdout);
 
   return tempStruct;
 

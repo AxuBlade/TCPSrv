@@ -1,4 +1,12 @@
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
 #include "../defines.h"
+#include "commands.h"
+#include "../messages/info_remote_handler.h"
 
 void command_get(struct cmdStruct* commandsList, int socket)  {
 
@@ -14,23 +22,24 @@ void command_get(struct cmdStruct* commandsList, int socket)  {
 
   signal(SIGINT, SIG_IGN);
   signal(SIGTERM, SIG_IGN);
+
   if(commandsList->wordCount == 4 && (textModeCheck || binaryModeCheck))  {
     if(textModeCheck) readMode = readModeText;
     else if(binaryModeCheck) readMode = readModeBinary;
     if((fileStream = fopen(commandsList->words[1],readMode)) == NULL)  {
       info_remote_handler(socket, __ERROR_OPENING_FILE);
       shutdown(socket, 1);
-      } else  {
-      while((readSize = fread(readBuffer, sizeof(char), __BUFFER_SIZE, fileStream)) > 0)  {
-        send(socket, readBuffer, readSize, 0);
+    } else  {
+        while((readSize = fread(readBuffer, sizeof(char), __BUFFER_SIZE, fileStream)) > 0)  {
+          send(socket, readBuffer, readSize, 0);
         }
-      fclose(fileStream);
-      stat(commandsList->words[1], &fileStat);
-      printf("Wyslano %d bajtow\n", (signed int)fileStat.st_size);
-      fflush(stdout);
-      shutdown(socket, 1);
-      }
-    } else info_remote_handler(socket,__GET_WRONG_SYNTAX);
+        fclose(fileStream);
+        stat(commandsList->words[1], &fileStat);
+        printf("Wyslano %d bajtow\n", (signed int)fileStat.st_size);
+        fflush(stdout);
+        shutdown(socket, 1);
+    } 
+  } else info_remote_handler(socket,__GET_WRONG_SYNTAX);
 
 
 }

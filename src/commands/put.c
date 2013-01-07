@@ -1,4 +1,13 @@
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include "../defines.h"
+#include "commands.h"
+#include "../messages/info_remote_handler.h"
 
 void command_put(struct cmdStruct* commandsList, int socket)  {
 
@@ -15,6 +24,7 @@ void command_put(struct cmdStruct* commandsList, int socket)  {
 
   signal(SIGINT, SIG_IGN);
   signal(SIGTERM, SIG_IGN);
+
   if(commandsList->wordCount == 4 && (textModeCheck || binaryModeCheck))  {
     if(textModeCheck) writeMode = writeModeText;
     else if(binaryModeCheck) writeMode = writeModeBinary;
@@ -23,22 +33,21 @@ void command_put(struct cmdStruct* commandsList, int socket)  {
       shutdown(socket, 0);
       close(socket);
       exit(1);
-      }
-    else  {
-      while((recvSize = recv(socket, writeBuffer, __BUFFER_SIZE, 0)) > 0) {
-        writeSize = fwrite(writeBuffer, sizeof(char), recvSize, fileStream);
+    } else  {
+        while((recvSize = recv(socket, writeBuffer, __BUFFER_SIZE, 0)) > 0) {
+          writeSize = fwrite(writeBuffer, sizeof(char), recvSize, fileStream);
         }
-      fclose(fileStream);
-      stat(commandsList->words[2], &fileStat);
-      if(!fileStat.st_size)  {
-        printf("Odebrano pusty plik plik %s -> usuwanie\n", commandsList->words[2], (signed int) fileStat.st_size);
-        info_remote_handler(socket,__EMPTY_FILE);
-        remove(commandsList->words[2]);
+        fclose(fileStream);
+        stat(commandsList->words[2], &fileStat);
+        if(!fileStat.st_size)  {
+          printf("Odebrano pusty plik plik %s -> usuwanie\n", commandsList->words[2], (signed int) fileStat.st_size);
+          info_remote_handler(socket,__EMPTY_FILE);
+          remove(commandsList->words[2]);
         } else printf("Odebrano plik %s o rozmiarze %d\n", commandsList->words[2], (signed int) fileStat.st_size);
-      shutdown(socket,0);
-      close(socket);
-      exit(0);
-      }
+        shutdown(socket,0);
+        close(socket);
+        exit(0);
+    }
   } else info_remote_handler(socket,__PUT_WRONG_SYNTAX);
 
 

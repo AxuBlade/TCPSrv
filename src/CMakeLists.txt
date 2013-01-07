@@ -1,10 +1,12 @@
 cmake_minimum_required (VERSION 2.6)
 
+
+include_directories("${PROJECT_SOURCE_DIR}/src")
 add_executable(tcpserver main.c connection_handling.c)
-add_subdirectory(commands_handling)
+add_subdirectory(commands)
 add_subdirectory(parsers)
-add_subdirectory(messages_handling)
-add_subdirectory(signals_handling)
+add_subdirectory(messages)
+add_subdirectory(signals)
 add_dependencies (tcpserver commands)
 add_dependencies (tcpserver parsers)
 add_dependencies (tcpserver messages)

@@ -1,4 +1,9 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include "../defines.h"
+#include "commands.h"
+
+#include "../messages/info_remote_handler.h"
 
 void command_replace(struct cmdStruct* commandsList, int socket)  {
 
