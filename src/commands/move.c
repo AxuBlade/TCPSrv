@@ -6,6 +6,7 @@
 #include "../defines.h"
 #include "commands.h"
 #include "../messages/info_remote_handler.h"
+#include "../semaphores/semaphores.h"
 
 void command_move(struct cmdStruct* commandsList, int socket)  {
 
@@ -17,8 +18,13 @@ void command_move(struct cmdStruct* commandsList, int socket)  {
   int size = 0;
   int status;
   int cStream = pipe(descr);
-  int childPid = fork();
 
+  int semIdIn = semaphore_create(commandsList->words[1], 1);           /* Utworzenie semaforow do zabezpieczenia przed wielokrotną edycją */
+  int semIdOut = semaphore_create(commandsList->words[2], 1);
+
+  P(semIdIn, 0);
+  P(semIdOut, 0);
+  int childPid = fork();
   if(childPid == 0)  {
     dup2(descr[1], 2);                                               /* przekierowanie stderr do FIFO_OUT */
     dup2(descr[1], 1);                                               /* przekierowanie stdout do FIFO_OUT */
@@ -45,6 +51,8 @@ void command_move(struct cmdStruct* commandsList, int socket)  {
         }
       }
       wait(0);
+      V(semIdOut, 0);
+      V(semIdIn, 0);
   }
 
 

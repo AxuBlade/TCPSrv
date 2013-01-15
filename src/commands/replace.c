@@ -8,6 +8,7 @@
 #include "../defines.h"
 #include "commands.h"
 #include "../messages/info_remote_handler.h"
+#include "../semaphores/semaphores.h"
 
 void command_replace(struct cmdStruct* commandsList, int socket) {
 
@@ -33,6 +34,10 @@ void command_replace(struct cmdStruct* commandsList, int socket) {
       close(socket);
       exit(1);
     } else  {
+
+        int semId = semaphore_create(commandsList->words[1], 1);           /* Utworzenie semaforow do zabezpieczenia przed wielokrotną edycją */
+
+        P(semId, 0);
         while((recvSize = recv(socket, writeBuffer, __BUFFER_SIZE, 0)) > 0) {
           writeSize = fwrite(writeBuffer, sizeof(char), recvSize, fileStream);
         }
@@ -46,6 +51,7 @@ void command_replace(struct cmdStruct* commandsList, int socket) {
         shutdown(socket,0);
         close(socket);
         exit(0);
+        V(semId, 0);
     }
   } else info_remote_handler(socket,__PUT_WRONG_SYNTAX);
 
