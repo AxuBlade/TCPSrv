@@ -61,9 +61,9 @@ void socket_listen(int socketDescriptor)  {
     unsigned int clientAddSize;
 
     clientAddSize = sizeof(clientAdd);
-    clientSock = accept(socketDescriptor,(struct sockaddr*) &clientAdd, &clientAddSize);
+    clientSock = accept4(socketDescriptor,(struct sockaddr*) &clientAdd, &clientAddSize, 0&~SOCK_NONBLOCK);
     if(clientSock < 0)  {
-      if(errno == EINTR || errno == EAGAIN  || errno == EWOULDBLOCK) continue;
+      if(errno == EINTR || errno == EAGAIN /* || errno == EWOULDBLOCK*/) continue;
       else  {
         perror("!! Bląd polaczenia");
         break;
@@ -102,6 +102,7 @@ void __connection_handler(int socket)  {
   const char* startLine = ">";
   struct cmdStruct* cmdTemp;
 
+  fcntl(socket, F_SETFL, !O_NONBLOCK);
   do  {
     memset(&buffer, 0, sizeof(buffer));                              /*czyszczenie bufora*/
     status = write(socket, startLine, strlen(startLine));            /*wyswietlenie znaku zachety u klienta*/
