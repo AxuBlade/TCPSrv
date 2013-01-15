@@ -102,7 +102,6 @@ void __connection_handler(int socket)  {
   const char* startLine = ">";
   struct cmdStruct* cmdTemp;
 
-  fcntl(socket, F_SETFL, !O_NONBLOCK);
   do  {
     memset(&buffer, 0, sizeof(buffer));                              /*czyszczenie bufora*/
     status = write(socket, startLine, strlen(startLine));            /*wyswietlenie znaku zachety u klienta*/
