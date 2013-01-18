@@ -8,12 +8,12 @@
 int splitter_countWords(char* buffer)  {
 
   int i;
-  int wordCount = 0;
+  int wordCount = 1;
 
-  for(i = 0; i < (strlen(buffer)); ++i)  {
-    if((int)buffer[i] == 32) wordCount++;
+  for (i = 0; i < (strlen(buffer)); ++i)  {
+    if ((int)buffer[i] == 32) wordCount++;
   }
-  return wordCount + 1;
+  return wordCount;
 
 
 }
@@ -29,7 +29,7 @@ struct cmdStruct* splitter(char* buffer)  {
   struct cmdStruct* tempStruct;
 
   tempStruct = (struct cmdStruct*) malloc(sizeof(struct cmdStruct));           /*inicjalizacja struktury*/
-  for(i = 0; i < vTabSize; ++i)  {
+  for (i = 0; i < vTabSize; ++i)  {
     wordSize = strcspn(buffer, spaces);
     temp[i] = (char*) malloc((wordSize + 1) * sizeof(char));
     memset(temp[i], 0, sizeof(temp[i]));
@@ -42,6 +42,5 @@ struct cmdStruct* splitter(char* buffer)  {
   tempStruct->words = temp;
 
   return tempStruct;
-
 
 }

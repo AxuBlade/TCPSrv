@@ -23,8 +23,8 @@ struct sockaddr_in input_parser(int argc_s, char **argv_s) {
   memset(&parsedArgs, 0, sizeof(struct sockaddr_in) );
   parsedArgs.sin_addr.s_addr = htonl(INADDR_ANY);                                   /*domyslnie: wyszstkie interfejsy o ile uzytkownik nie poda na wejsciu adresu*/
 
-  while((opt = getopt_long(argc_s, argv_s, optString, longOpts, NULL )) != -1)  {
-    switch(opt)  {
+  while ((opt = getopt_long(argc_s, argv_s, optString, longOpts, NULL )) != -1)  {
+    switch (opt)  {
       case 'p':
         parsedArgs.sin_port = htons((short) atoi(optarg));
         break;
@@ -35,6 +35,7 @@ struct sockaddr_in input_parser(int argc_s, char **argv_s) {
 
       case 'h':
         info_local_handler(__SYNTAX_REQUEST);
+        exit(0);
         break;
 
       default:                                                                      /*opcja tylko dla celow zgodnosci ze standardem. Nie ma prawa wystąpic*/
@@ -44,6 +45,5 @@ struct sockaddr_in input_parser(int argc_s, char **argv_s) {
   parsedArgs.sin_family = AF_INET;
 
   return parsedArgs;
-
 
 }

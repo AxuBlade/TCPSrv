@@ -12,17 +12,19 @@
 #define __CLIENT_STOPPED_CONNECTION 3
 #define __TRANSFER_ERROR 4
 #define __CONNECTION_TERMINATED 5
+#define __WAITING_FOR_CONNECTION 6
 
 /* Stale do obslugi komunikatow zdalnych */
 #define __TYPE_QUIT 0
 #define __TRANSFER_COMPLETE 1
 #define __GET_WRONG_SYNTAX 2
 #define __PUT_WRONG_SYNTAX 3
-#define __ERROR_OPENING_FILE 4
-#define __COMMAND_EXEC_ERROR 5
-#define __INVALID_COMMAND 6
-#define __EMPTY_FILE 7
-#define __UNEXPECTED_TERMINATION 8
+#define __REPLACE_WRONG_SYNTAX 4
+#define __ERROR_OPENING_FILE 5
+#define __COMMAND_EXEC_ERROR 6
+#define __INVALID_COMMAND 7
+#define __EMPTY_FILE 8
+#define __UNEXPECTED_TERMINATION 9
 
 
 struct cmdStruct  {                                                               /* struktura do przechowywania komend przeslanych przez uzytkownika w postaci poszczegolnych slow */
