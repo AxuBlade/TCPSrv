@@ -40,7 +40,7 @@ void info_local_handler (int msgNo) {
       break;
 
     case 6:
-      printf("%s", connectionTerminated);
+      printf("%s", waitingForConnection);
       break;
   }
   fflush(stdout);
