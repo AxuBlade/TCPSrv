@@ -52,5 +52,6 @@ void clear_screen()  {
     const char* clearScreenMessage = "\e[1;1H\e[2J";
 
     printf("%s",clearScreenMessage);
+    fflush(stdout);
 
 }

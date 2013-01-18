@@ -82,8 +82,8 @@ void socket_listen(int socketDescriptor)  {
     else printf(">> Zaakceptowano polaczenie. IP klienta: %s:%d\n>>>> PID procesu do obsługi klienta: %d\n", inet_ntoa(clientAdd.sin_addr), clientAdd.sin_port, clientPid);
     close(clientSock);
   } while (permissionToRunFlag);
+
   close(socketDescriptor);
-  while (wait(0) != -1) continue;
   info_local_handler(__STOP_SERVER);
 
 }
