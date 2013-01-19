@@ -1,5 +1,6 @@
 #include "signals.h"
 #include "../defines.h"
+#include "../semaphores/flags.h"
 
 #include <signal.h>
 #include <sys/types.h>
@@ -8,7 +9,6 @@
 
 void signal_handler(int signo)  {
 
-  volatile unsigned short int* setFlag = (volatile unsigned short int*) &permissionToRunFlag;
   pid_t pid;
   int status;
   
@@ -21,7 +21,7 @@ void signal_handler(int signo)  {
   if ((signo == SIGINT) || (signo == SIGTERM))  {
     printf("!!!! Proces PID = %d: Przechwycono sygnal %s\n", getpid(), signo == SIGINT ? "SIGINT" : "SIGTERM");
     fflush(stdout);
-    if (*setFlag) *setFlag = 0;
+    if (get_flag()) set_flag(0);
   }
 
 }

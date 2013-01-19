@@ -32,6 +32,4 @@ struct cmdStruct  {                                                             
   int    wordCount;
 };
 
-volatile const short unsigned int permissionToRunFlag;
-
 #endif

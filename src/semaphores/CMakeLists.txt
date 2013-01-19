@@ -1,1 +1,1 @@
-add_library (semaphores STATIC semaphores.c)
+add_library (semaphores STATIC semaphores.c flags.c)
