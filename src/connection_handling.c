@@ -85,8 +85,6 @@ void socket_listen(int socketDescriptor)  {
     close(clientSock);
   } while (get_flag());
 
-  close(socketDescriptor);
-  info_local_handler(__STOP_SERVER);
 
 }
 

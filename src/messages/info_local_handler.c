@@ -8,7 +8,7 @@ void info_local_handler (int msgNo) {
 
   char* Syntax = "Skladnia: serwer_plikow [OPCJA]\n-i --interface=[ADRES_IP]    Adres, na ktorym serwer nasluchuje (domyslnie: wszystkie interfejsy)\n-p --port=[PORT]                 Numer portu, na ktorym serwer nasluchuje (opcja wymagana)\n\n";
   char* invalidSyntax = "Serwer Plikow: Nieprawidlowa Skladnia. Wywolaj program z opcja -h lub --help aby uzyskac pomoc\n";
-  char* stopServerMessage = "\n\n!----------SERWER ZAKONCZYL PRACE----------!\n\n";
+  char* stopServerMessage = "\e[32m\n\n!----------SERWER ZAKONCZYL PRACE----------!\n\n\e[37m";
   char* clientStoppedConnection = ">> Klient zakonczyl polaczenie\n";
   char* transferError = "!! Blad otrzymanych danych\n";
   char* connectionTerminated = ">> Zakonczono polaczenie z klientem\n";

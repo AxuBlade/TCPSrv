@@ -32,6 +32,7 @@ int main(int argc, char **argv)  {
   }
 
   while (wait(0) != -1) continue;                                              /* ewentualne zakonczenie procesow potomnych */
+  info_local_handler(__STOP_SERVER);
   exit(0);
 
 }
