@@ -21,7 +21,7 @@ void signal_handler(int signo)  {
   if ((signo == SIGINT) || (signo == SIGTERM))  {
     printf("!!!! Proces PID = %d: Przechwycono sygnal %s\n", getpid(), signo == SIGINT ? "SIGINT" : "SIGTERM");
     fflush(stdout);
-    if (get_flag()) set_flag(0);
+    set_flag(0);
   }
 
 }
