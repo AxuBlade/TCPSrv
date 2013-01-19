@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include "../defines.h"
@@ -46,6 +47,7 @@ void command_get(struct cmdStruct* commandsList, int socket)  {
           V(semId, 0);
 
           if (semaphore_value_lookup(semId, 0)) semaphore_remove(semId);
+          close(socket);
           exit(0);
       }
     } else info_remote_handler(socket, __GET_WRONG_SYNTAX);

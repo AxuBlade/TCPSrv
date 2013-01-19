@@ -77,7 +77,8 @@ void socket_listen(int socketDescriptor)  {
   sigset(SIGTERM, signal_handler);
       close(socketDescriptor);
       __connection_handler(clientSock);
-      close(clientSock);
+      printf("XXXXXXXXXXXXXX %d\n\n",close(clientSock));
+      fflush(stdout);
       info_local_handler(__CONNECTION_TERMINATED);
       exit(0);
     }

@@ -51,7 +51,6 @@ void command_replace(struct cmdStruct* commandsList, int socket) {
             remove(commandsList->words[1]);
           } else printf("Odebrano plik %s o rozmiarze %d\n", commandsList->words[2], (signed int) fileStat.st_size);
           shutdown(socket, 0);
-          close(socket);
           V(semId, 0);
           if(semaphore_value_lookup(semId, 0)) semaphore_remove(semId);
           exit(0);
