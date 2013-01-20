@@ -19,11 +19,9 @@ void command_rm(struct cmdStruct* commandsList, int socket)  {
   int status;
   int cStream = pipe(descr);
   int childPid;
-  int semIdIn = semaphore_create(commandsList->words[1], 1);           /* Utworzenie semaforow do zabezpieczenia przed wielokrotną edycją */
-  int semIdOut = semaphore_create(commandsList->words[2], 1);
+  int semId = semaphore_create(commandsList->words[1], 1);           /* Utworzenie semaforow do zabezpieczenia przed wielokrotną edycją */
 
-  P(semIdIn, 0);
-  P(semIdOut, 0);
+  P(semId, 0);
 
   childPid = fork();
 
@@ -53,11 +51,8 @@ void command_rm(struct cmdStruct* commandsList, int socket)  {
         }
       }
       wait(0);
-      V(semIdOut, 0);
-      V(semIdIn, 0);
-      if(semaphore_value_lookup(semIdIn, 0)) semaphore_remove(semIdIn);
-      if(semaphore_value_lookup(semIdOut, 0)) semaphore_remove(semIdOut);
-
+      V(semId, 0);
+      if(semaphore_value_lookup(semId, 0)) semaphore_remove(semId);
   }
 
 }
